@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'BUILD_REQUIRED', defaultValue: 'true', description: 'Should the project be built?')
+        string(name: 'TARGET_SERVER', defaultValue: 'server01', description: 'Target server name')
+        string(name: 'DEPLOY_REQUIRED', defaultValue: 'true', description: 'Should the project be deployed?')
+        string(name: 'VERSION', defaultValue: '1.0.0', description: 'Project version')
+        string(name: 'GIT_BRANCH', defaultValue: 'main', description: 'Git branch to build')
+    }
+
+    stages {
+        stage('Parameter Validation') {
+            steps {
+                script {
+                    if (!params.BUILD_REQUIRED || !params.TARGET_SERVER || !params.VERSION || !params.GIT_BRANCH) {
+                        error("Missing required parameters.")
+                    }
+                }
+            }
+        }
+
+        stage('Call Ansible Playbook') {
+            steps {
+                echo "Triggering Ansible Playbook..."
+                sh """
+                    ansible-playbook automation.yml \
+                    --extra-vars "build_required=${params.BUILD_REQUIRED} \
+                    target_server=${params.TARGET_SERVER} \
+                    deploy_required=${params.DEPLOY_REQUIRED} \
+                    version=${params.VERSION} \
+                    git_branch=${params.GIT_BRANCH}"
+                """
+            }
+        }
+    }
+}
