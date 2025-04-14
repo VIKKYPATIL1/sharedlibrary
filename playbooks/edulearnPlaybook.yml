@@ -1,0 +1,19 @@
+---
+- name: DevOps Automation with Build and Test
+  hosts: "{{ target_server }}"
+  vars:
+    git_repo: "https://your-git-repo/project.git"
+  tasks:
+
+    - name: Run Build Script
+      shell: |
+        chmod +x /tmp/build_project.sh
+        /tmp/build_project.sh {{ git_repo }} {{ git_branch }} {{ version }}
+      when: build_required == "true"
+
+    - name: Run Test Script (JUnit Test Harness)
+      shell: |
+        chmod +x /tmp/run_tests.sh
+        /tmp/run_tests.sh {{ version }}
+      when: build_required == "true" and deploy_required == "true"
+---
